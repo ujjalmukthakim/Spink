@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import os
 import sys
-
+# very good 
 
 def main():
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
