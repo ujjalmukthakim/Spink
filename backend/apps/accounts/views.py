@@ -8,6 +8,9 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from apps.posts.models import Post
 from apps.tasks.models import LikeTask
 
+from rest_framework.permissions import IsAdminUser
+from rest_framework import generics
+
 from .models import Verification
 from .serializers import (
     RealLikeTokenSerializer,
@@ -74,3 +77,12 @@ class VerificationHistoryView(generics.ListAPIView):
 
     def get_queryset(self):
         return Verification.objects.filter(user=self.request.user).order_by("-created_at")
+    
+class AdminVerificationListView(generics.ListAPIView):
+    serializer_class = VerificationSerializer
+    permission_classes = [IsAdminUser]
+
+    def get_queryset(self):
+        return Verification.objects.filter(
+            status=Verification.Status.PENDING
+        ).order_by("-created_at")

@@ -63,7 +63,7 @@ export default function AdminPage() {
 
   async function reviewVerification(id, approve) {
     try {
-      await apiRequest("/auth/verification/history/", {
+      await apiRequest("/auth/verifications/", {
         method: "POST",
         body: { verification_id: id, approve },
       });
