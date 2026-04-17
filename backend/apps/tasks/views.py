@@ -10,7 +10,8 @@ from apps.posts.serializers import PostSerializer
 from .models import LikeTask
 from .serializers import LikeTaskSerializer, TaskConfirmSerializer
 from .services import confirm_like
-
+from django.db import transaction
+from django.db.models import F
 
 class AvailableTaskListView(generics.ListAPIView):
     serializer_class = PostSerializer
@@ -46,17 +47,27 @@ class MyTaskHistoryView(generics.ListAPIView):
         ).filter(user=self.request.user)
 
 
-class ConfirmTaskView(APIView):
-    def post(self, request):
-        serializer = TaskConfirmSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
 
-        task = confirm_like(
-            request.user,
-            serializer.validated_data["post_id"]
+def confirm_like(user, post_id):
+    post = Post.objects.get(id=post_id)
+
+    if user.credits < 1:
+        raise ValueError("Not enough credits")
+
+    with transaction.atomic():
+        # create task
+        task = LikeTask.objects.create(
+            user=user,
+            post=post,
+            credit_delta=1
         )
 
-        return Response(
-            LikeTaskSerializer(task).data,
-            status=status.HTTP_201_CREATED
-        )
+        # 🔥 THIS IS THE MISSING PART
+        user.credits = F("credits") - 1
+        user.save(update_fields=["credits"])
+
+        # (optional but important)
+        post.current_likes = F("current_likes") + 1
+        post.save(update_fields=["current_likes"])
+
+    return task
