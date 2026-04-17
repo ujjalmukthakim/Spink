@@ -7,6 +7,8 @@ from .models import User, Verification
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
     list_display = ("id", "email", "username", "credits", "is_verified", "is_admin", "is_banned")
+    list_editable = ("is_verified", "is_banned")  # 👈 ADD THIS
+
     fieldsets = BaseUserAdmin.fieldsets + (
         (
             "RealLike",
