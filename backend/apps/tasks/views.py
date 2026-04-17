@@ -1,5 +1,5 @@
 from django.db import models
-from django.db.models import Exists, OuterRef
+from django.db.models import Exists, OuterRef, F
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -17,7 +17,12 @@ class AvailableTaskListView(generics.ListAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        completed_subquery = LikeTask.objects.filter(user=user, post=OuterRef("pk"))
+
+        completed_subquery = LikeTask.objects.filter(
+            user=user,
+            post=OuterRef("pk")
+        )
+
         return (
             Post.objects.select_related("owner")
             .annotate(already_done=Exists(completed_subquery))
@@ -26,7 +31,7 @@ class AvailableTaskListView(generics.ListAPIView):
                 owner__credits__gt=0,
                 owner__is_banned=False,
                 owner__is_verified=True,
-                current_likes__lt=models.F("required_likes"),
+                current_likes__lt=F("required_likes"),
             )
             .exclude(owner=user)
             .filter(already_done=False)
@@ -38,12 +43,22 @@ class MyTaskHistoryView(generics.ListAPIView):
     serializer_class = LikeTaskSerializer
 
     def get_queryset(self):
-        return LikeTask.objects.select_related("post", "post__owner").filter(user=self.request.user)
+        return LikeTask.objects.select_related(
+            "post", "post__owner"
+        ).filter(user=self.request.user)
 
 
 class ConfirmTaskView(APIView):
     def post(self, request):
         serializer = TaskConfirmSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        task = confirm_like(request.user, serializer.validated_data["post_id"])
-        return Response(LikeTaskSerializer(task).data, status=status.HTTP_201_CREATED)
+
+        task = confirm_like(
+            request.user,
+            serializer.validated_data["post_id"]
+        )
+
+        return Response(
+            LikeTaskSerializer(task).data,
+            status=status.HTTP_201_CREATED
+        )
