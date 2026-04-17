@@ -28,9 +28,7 @@ class AvailableTaskListView(generics.ListAPIView):
             .annotate(already_done=Exists(completed_subquery))
             .filter(
                 status=Post.Status.ACTIVE,
-                owner__credits__gt=0,
                 owner__is_banned=False,
-                owner__is_verified=True,
                 current_likes__lt=F("required_likes"),
             )
             .exclude(owner=user)
