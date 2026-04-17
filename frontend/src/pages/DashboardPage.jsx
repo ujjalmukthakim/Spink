@@ -57,7 +57,7 @@ export default function DashboardPage() {
           <p className="eyebrow">Dashboard</p>
           <h2>{dashboard.user.is_verified ? "Verified and active" : "Verification required"}</h2>
           <p className="muted">
-            Credits: {dashboard.user.credits} | Trust score: {dashboard.user.trust_score}
+            Credits: {dashboard.user.credits} | Trust score: {dashboard.user.trust_score} | ID : {dashboard.user.id}
           </p>
         </div>
         <div className={`pill ${dashboard.user.is_verified ? "ok" : "warn"}`}>
