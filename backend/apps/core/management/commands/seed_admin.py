@@ -25,6 +25,8 @@ class Command(BaseCommand):
         user.username = username
         user.is_admin = True
         user.is_staff = True
+        # "is_verified": false,
+        user.is_verified= True
         user.is_superuser = True
         user.set_password(password)
         user.save()
