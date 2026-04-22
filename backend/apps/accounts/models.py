@@ -17,7 +17,7 @@ class User(AbstractUser):
     is_admin = models.BooleanField(default=False)
     is_banned = models.BooleanField(default=False)
     last_task_completed_at = models.DateTimeField(null=True, blank=True)
-    referral_code = models.CharField(max_length=20, unique=True,null=True,blank=True, default=generate_ref_code)
+    referral_code = models.CharField(max_length=20,null=True,blank=True, default=generate_ref_code)
 
     referred_by = models.ForeignKey(
     "self",
