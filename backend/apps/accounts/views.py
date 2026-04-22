@@ -70,7 +70,7 @@ class VerificationRequestView(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
         verification = serializer.save()
         return Response(VerificationSerializer(verification).data, status=status.HTTP_201_CREATED)
-
+# ok
 
 class VerificationHistoryView(generics.ListAPIView):
     serializer_class = VerificationSerializer
