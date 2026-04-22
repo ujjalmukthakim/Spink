@@ -4,6 +4,10 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 
+def generate_ref_code():
+    return str(uuid.uuid4())[:8]
+
+
 class User(AbstractUser):
     email = models.EmailField(unique=True)
     instagram_username = models.CharField(max_length=150, blank=True)
@@ -13,6 +17,17 @@ class User(AbstractUser):
     is_admin = models.BooleanField(default=False)
     is_banned = models.BooleanField(default=False)
     last_task_completed_at = models.DateTimeField(null=True, blank=True)
+    referral_code = models.CharField(max_length=20, unique=True, default=generate_ref_code)
+
+    referred_by = models.ForeignKey(
+    "self",
+    null=True,
+    blank=True,
+    on_delete=models.SET_NULL,
+    related_name="referrals"
+    )
+
+    referral_rewarded = models.BooleanField(default=False)
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["username"]
@@ -48,3 +63,8 @@ class Verification(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.status}"
+
+
+
+
+

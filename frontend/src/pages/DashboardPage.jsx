@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 
+
 import StatCard from "../components/StatCard";
 import { useAuth } from "../context/AuthContext";
 import { apiRequest } from "../lib/api";
@@ -11,12 +12,18 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState("");
+  const APP_URL = import.meta.env.VITE_APP_URL;
+
+  const referralLink = dashboard?.user?.referral_code
+  ? `${APP_URL}/register?ref=${dashboard.user.referral_code}`
+  : "";
 
   async function loadDashboard() {
     setLoading(true);
     try {
       const data = await apiRequest("/users/dashboard/");
       setDashboard(data);
+      // console.log(dashboard.user)
       setVerificationUsername(data.user.instagram_username || "");
     } finally {
       setLoading(false);
@@ -57,7 +64,10 @@ export default function DashboardPage() {
           <p className="eyebrow">Dashboard</p>
           <h2>{dashboard.user.is_verified ? "Verified and active" : "Verification required"}</h2>
           <p className="muted">
-            Credits: {dashboard.user.credits} | Trust score: {dashboard.user.trust_score} | ID : {dashboard.user.id}
+            Credits: {dashboard.user.credits} | Trust score: {dashboard.user.trust_score} | ID : {dashboard.user.id} | Referral Code: {dashboard?.user?.referral_code} | Link :
+            <button onClick={() => navigator.clipboard.writeText(referralLink)}>
+           Copy Referral Link
+           </button>
           </p>
         </div>
         <div className={`pill ${dashboard.user.is_verified ? "ok" : "warn"}`}>

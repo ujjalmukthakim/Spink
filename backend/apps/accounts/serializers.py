@@ -20,24 +20,39 @@ class UserSerializer(serializers.ModelSerializer):
             "is_verified",
             "is_admin",
             "is_banned",
+            "referral_code",
         )
-        read_only_fields = ("credits", "trust_score", "is_verified", "is_admin", "is_banned")
+        read_only_fields = ("credits", "trust_score", "is_verified", "is_admin", "is_banned","referral_code")
 
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, min_length=8)
+    referral_code = serializers.CharField(required=False, allow_blank=True)
 
     class Meta:
         model = User
-        fields = ("username", "email", "password", "instagram_username")
+        fields = ("username", "email", "password", "instagram_username", "referral_code",)
 
     def create(self, validated_data):
-        return User.objects.create_user(
+        ref_code = validated_data.pop("referral_code", None)
+
+        user = User.objects.create_user(
             username=validated_data["username"],
             email=validated_data["email"],
             password=validated_data["password"],
-            instagram_username=validated_data.get("instagram_username", ""),
+            instagram_username=validated_data.get("instagram_username", "")
         )
+
+        # attach referral
+        if ref_code:
+            try:
+                referrer = User.objects.get(referral_code=ref_code)
+                user.referred_by = referrer
+                user.save()
+            except User.DoesNotExist:
+                pass
+
+        return user
 
 
 class RealLikeTokenSerializer(TokenObtainPairSerializer):
